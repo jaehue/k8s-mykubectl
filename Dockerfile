@@ -1,6 +1,6 @@
-FROM lachlanevenson/k8s-kubectl:v1.15.10
+FROM lachlanevenson/k8s-kubectl:v1.18.0
 
-LABEL maintainer="siriuszg <zhigang52110@sina.com>"
+LABEL maintainer="jaehue"
 
 RUN apk update --no-cache && apk add --no-cache jq
 
