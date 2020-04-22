@@ -27,7 +27,6 @@
       },
       "spec": {
         "imagePullSecrets": [$IMAGE_PULL_SECRETS],
-        "nodeSelector": { "app-ready": "true" },
         "terminationGracePeriodSeconds": 60,
         "containers": [
           {
