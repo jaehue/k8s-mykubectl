@@ -35,7 +35,7 @@ create_controller_config()
     echo "Cann't create deployment json."
     lost_arg_error
   fi
-  
+
   if [ -z "${PORTS}" ]; then
     sed -i "/ports/d"          "controller.json.sed"
     sed -i "/readinessProbe/d" "controller.json.sed"
@@ -46,7 +46,7 @@ create_controller_config()
     READINESSPROBE='{"tcpSocket":{"port":'${READINESS_PORT}'},"initialDelaySeconds":10,"timeoutSeconds":10,"periodSeconds":20,"successThreshold":1,"failureThreshold":6}'
     LIVENESSPROBE=$READINESSPROBE
   fi
-  
+
   if [ -z "${IMAGE_PULL_SECRETS}" ]; then
     sed -i "/imagePullSecrets/d" "controller.json.sed"
   fi
@@ -58,7 +58,7 @@ create_controller_config()
   fi
 
   IMAGE=`echo ${IMAGE} | sed 's#\/#\\\/#g'`
-  
+
   sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$REPLICAS/${REPLICAS}/g;s/\\\$IMAGE_PULL_SECRETS/${IMAGE_PULL_SECRETS}/g;s/\\\$IMAGE/${IMAGE}/g;s/\\\$RESOURCES/${RESOURCES}/g;s/\\\$ENVIRONMENT/${ENVIRONMENTS}/g;s/\\\$PORTS/${PORTS}/g;s/\\\$READINESSPROBE/${READINESSPROBE}/g;s/\\\$LIVENESSPROBE/${LIVENESSPROBE}/g;" \
   "controller.json.sed" > controller.json
 }
@@ -75,7 +75,7 @@ create_service_config()
   else
     SERVICE_ANNOTATIONS=`echo ${SERVICE_ANNOTATIONS} | sed 's#\/#\\\/#g'`
   fi
-  
+
   sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$SERVICE_TYPE/${SERVICE_TYPE}/g;s/\\\$SERVICE_PORTS/${SERVICE_PORTS}/g;s/\\\$ANNOTATIONS/${SERVICE_ANNOTATIONS}/g;" \
   "./service.json.sed" > ./service.json
 }
@@ -96,7 +96,7 @@ create_ingress_config()
   elif [ "${INGRESS_ANNOTATIONS}" = "hw" ]; then
     INGRESS_ANNOTATIONS='{ "ingress.kubernetes.io/add-base-url": "false", "ingress.kubernetes.io/rewrite-target": "/", "ingress.kubernetes.io/secure-backends": "false", "ingress.beta.kubernetes.io/role": "data" }'
   elif [ "${INGRESS_ANNOTATIONS}" = "nginx" ]; then
-    INGRESS_ANNOTATIONS='{ "kubernetes.io/ingress.class": "nginx", "ingress.kubernetes.io/add-base-url": "false", "ingress.kubernetes.io/rewrite-target": "/" }'
+    INGRESS_ANNOTATIONS='{ "nginx.ingress.kubernetes.io/rewrite-target": "/$2" }'
   elif [ "${INGRESS_ANNOTATIONS}" = "kong" ]; then
     INGRESS_ANNOTATIONS='{ "kubernetes.io/ingress.class": "kong", "configuration.konghq.com": "need-strip-path" }'
   fi
@@ -151,7 +151,7 @@ if kubectl get ing ${NAME} -n ${NAMESPACE} &> /dev/null; then
   echo "Ingress ${NAMESPACE}.${NAME} already exists. Don't need deployment."
 else
   create_ingress_config
-  
+
   if [ -f ./ingress.json ]; then
     echo "Ingress ${NAMESPACE}.${NAME}, Apply a configuration to a resource."
     echo
